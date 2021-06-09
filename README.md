@@ -19,16 +19,17 @@ git clone https://github.com/whiskeykilosec/hackerone2threadfix.git
 ```
 
 ### API Authentication
-1. Make sure you've created a HackerOne API token according to the instructions [here](https://docs.hackerone.com/programs/api-tokens.html).
-2. Add your HackerOne API identifier as an OS environment variable named "H1_IDENTIFIER" and the token itself as "H1_TOKEN".
+1. Make sure you've created a HackerOne API token according to the instructions [here](https://docs.hackerone.com/programs/api-tokens.html)
+2. Add your HackerOne API identifier as an OS environment variable named "H1_IDENTIFIER" and the token itself as "H1_TOKEN"
 
 ## Usage
 For all options and instructions run: `python hackerone2threadfix.py -h`
 
 ## Reference Documentation
-- HackerOne
-    - https://api.hackerone.com
-    - https://docs.hackerone.com
-- ThreadFix: SSVL Converter tool can be used with mappings and changes specified below
-    - formatting guidelines: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/24088548/SSVL+Converter
-    - tool reference: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/496009270/ThreadFix+File+Format
+HackerOne
+- https://api.hackerone.com
+- https://docs.hackerone.com
+
+ThreadFix: SSVL Converter tool can be used with mappings and changes specified below
+- formatting guidelines: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/24088548/SSVL+Converter
+- tool reference: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/496009270/ThreadFix+File+Format
