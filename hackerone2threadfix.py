@@ -3,11 +3,14 @@ import os
 import sys
 import pandas
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
+import argparse
 
-# Usage
-# required arg 1 is program handle
+# usage
+parser = argparse.ArgumentParser(
+    description="""Script that enables a quick, API-based export from HackerOne to a compatible .csv format for fast upload to ThreadFix."""
+)
+parser.add_argument("h1_program_handle", help="your HackerOne program handle")
+args = parser.parse_args()
 
 # API variables
 headers = {"Accept": "application/json"}
