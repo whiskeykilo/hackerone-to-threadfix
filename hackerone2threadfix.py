@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 import os
+import sys
 import pandas
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
-headers = {"Accept": "application/json"}  # H1 API headers
+# API variables
+headers = {"Accept": "application/json"}
+url = "https://api.hackerone.com/v1/"
 
 # get H1 API creds from OS variables
 user = os.environ.get("H1_IDENTIFIER")
 token = os.environ.get("H1_TOKEN")
+program = os.environ.get("H1_PROGRAM")
 
-# read csv file. By default HackerOne will export as 'export.csv'
+# create .csv file
 df = pandas.DataFrame()
 
 # add columns
@@ -35,7 +41,15 @@ df.replace(to_replace="medium", value="Medium", inplace=True)
 df.replace(to_replace="low", value="Low", inplace=True)
 df.replace(to_replace="none", value="Info", inplace=True)
 
+# pull all program reports
+r = requests.get(
+    "https://api.hackerone.com/v1/reports/",
+    auth=(user, token),
+    params={"filter[program][]": [sys.argv[1]]},
+    headers=headers,
+)
+print(r.json())
+
 # write file
 df.to_csv("h1-export.csv", index=False)
-
-print(df)
+# print(df)

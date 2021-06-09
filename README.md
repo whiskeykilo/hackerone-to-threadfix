@@ -20,7 +20,9 @@ git clone https://github.com/whiskeykilosec/hackerone2threadfix.git
 
 ### API Authentication
 1. Make sure you've created a HackerOne API token according to the instructions [here](https://docs.hackerone.com/programs/api-tokens.html)
-2. Add your HackerOne API identifier as an OS environment variable named "H1_IDENTIFIER" and the token itself as "H1_TOKEN"
+2. Add your HackerOne credentials as OS environment variables
+    - the identifier as "H1_IDENTIFIER" 
+    - the token as "H1_TOKEN"
 
 ## Usage
 For all options and instructions run: `python hackerone2threadfix.py -h`
