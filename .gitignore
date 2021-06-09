@@ -112,7 +112,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# other
 .DS_Store
 *.csv
 *.xml
 .vscode
+.gitattributes
