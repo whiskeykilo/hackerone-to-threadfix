@@ -117,4 +117,4 @@ venv.bak/
 *.xml
 .vscode
 .gitattributes
-.json
+*.json
