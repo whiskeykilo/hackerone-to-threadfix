@@ -6,6 +6,9 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
+# Usage
+# required arg 1 is program handle
+
 # API variables
 headers = {"Accept": "application/json"}
 url = "https://api.hackerone.com/v1/"
@@ -42,13 +45,12 @@ df.replace(to_replace="low", value="Low", inplace=True)
 df.replace(to_replace="none", value="Info", inplace=True)
 
 # pull all program reports
-r = requests.get(
+response = requests.get(
     "https://api.hackerone.com/v1/reports/",
     auth=(user, token),
     params={"filter[program][]": [sys.argv[1]]},
     headers=headers,
-)
-print(r.json())
+).text
 
 # write file
 df.to_csv("h1-export.csv", index=False)
