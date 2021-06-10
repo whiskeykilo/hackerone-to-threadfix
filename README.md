@@ -17,6 +17,7 @@ sudo pip install -r requirements.txt
 ```
 git clone https://github.com/whiskeykilosec/hackerone2threadfix.git
 ```
+or just grab the python file
 
 ### API Authentication
 1. Make sure you've created a HackerOne API token according to the instructions [here](https://docs.hackerone.com/programs/api-tokens.html)
