@@ -48,112 +48,125 @@ token = os.environ.get("H1_TOKEN")
 program = os.environ.get("H1_PROGRAM")
 
 # get all program reports from the H1 API
-response = requests.get(
+raw = requests.get(
     "https://api.hackerone.com/v1/reports/",
     auth=(user, token),
     params={"filter[program][]": [sys.argv[1]]},
     headers=headers,
-).json()
+)
 
-# Report IDs - data.id
-id_list = [response["data"][id]["id"] for id in range(len(response["data"]))]
-# add to dataframe
-df["NativeID"] = id_list
+response = raw.json()
 
-# Weaknesses - data.relationships.weakness.data.attributes.external_id
-cwe_list = []
-for id in range(len(id_list)):
-    temp = response["data"][id]["relationships"]
-    temp2 = "".join(json_extract(temp, "external_id"))
-    cwe_list.append(temp2[4:])
-# add to dataframe
-df["CWE"] = cwe_list
+# Check authentication & authorization
+if raw.status_code == 404:
+    print("\nThe H1 API returned no data.\n")
+    print(
+        "There may be an issue with your authentication or authorization. Please check that your H1 API identifier, API token, program handle, and program permissions are all correct.\n"
+    )
+    print(
+        "Helpful references:\n- https://api.hackerone.com\n- https://docs.hackerone.com"
+    )
+else:
+    # Report IDs - data.id
+    id_list = [response["data"][id]["id"] for id in range(len(response["data"]))]
+    print("Number of reports found: " + str(len(id_list)) + "\n")
 
-# Severities - data.relationships.severity.data.attributes.rating
-sev_list = []
-for id in range(len(id_list)):
-    temp = response["data"][id]["relationships"]
-    temp2 = "".join(json_extract(temp, "rating"))
-    sev_list.append(temp2)
-# add to dataframe
-df["Severity"] = sev_list
+    # add to dataframe
+    df["NativeID"] = id_list
 
-# Report Title - data.attributes.title
-title_list = []
-for id in range(len(id_list)):
-    temp = response["data"][id]["attributes"]
-    temp2 = "".join(json_extract(temp, "title"))
-    title_list.append(temp2)
-# add to dataframe
-df["ShortDescription"] = title_list
+    # Weaknesses - data.relationships.weakness.data.attributes.external_id
+    cwe_list = []
+    for id in range(len(id_list)):
+        temp = response["data"][id]["relationships"]
+        temp2 = "".join(json_extract(temp, "external_id"))
+        cwe_list.append(temp2[4:])
+    # add to dataframe
+    df["CWE"] = cwe_list
 
-# Report Body - data.attributes.vulnerability_information
-body_list = []
-for id in range(len(id_list)):
-    temp = response["data"][id]["attributes"]
-    temp2 = "".join(json_extract(temp, "vulnerability_information"))
-    body_list.append(temp2)
-# add to dataframe
-df["LongDescription"] = body_list
+    # Severities - data.relationships.severity.data.attributes.rating
+    sev_list = []
+    for id in range(len(id_list)):
+        temp = response["data"][id]["relationships"]
+        temp2 = "".join(json_extract(temp, "rating"))
+        sev_list.append(temp2)
+    # add to dataframe
+    df["Severity"] = sev_list
 
-# Date - data.attributes.created_at - 2021-04-07T17:34:57.748Z
-date_list = []
-for id in range(len(id_list)):
-    temp = response["data"][id]["attributes"]
-    temp2 = "".join(json_extract(temp, "created_at"))
-    temp3 = temp2[:10]
-    date = datetime.strptime(temp3, "%Y-%m-%d")
-    date = date.strftime("%d/%m/%Y")
-    date_list.append(date)
-# add to dataframe
-df["Date"] = date_list
+    # Report Title - data.attributes.title
+    title_list = []
+    for id in range(len(id_list)):
+        temp = response["data"][id]["attributes"]
+        temp2 = "".join(json_extract(temp, "title"))
+        title_list.append(temp2)
+    # add to dataframe
+    df["ShortDescription"] = title_list
 
-# Individual Report URLs
-url_list = []
-for i in range(len(id_list)):
-    temp = "https://hackerone.com/reports/" + id_list[i]
-    url_list.append(temp)
-# add to dataframe
-df["url"] = url_list
+    # Report Body - data.attributes.vulnerability_information
+    body_list = []
+    for id in range(len(id_list)):
+        temp = response["data"][id]["attributes"]
+        temp2 = "".join(json_extract(temp, "vulnerability_information"))
+        body_list.append(temp2)
+    # add to dataframe
+    df["LongDescription"] = body_list
 
-# add columns
-df.insert(0, "LineText", "")
-df.insert(0, "ColumnNumber", 1)
-df.insert(0, "LineNumber", 1)
-df.insert(0, "SourceFileName", "")
-df.insert(0, "IssueID", "")
-df.insert(0, "parameter", "")
-df.insert(0, "Source", "HackerOne")
+    # Date - data.attributes.created_at - 2021-04-07T17:34:57.748Z
+    date_list = []
+    for id in range(len(id_list)):
+        temp = response["data"][id]["attributes"]
+        temp2 = "".join(json_extract(temp, "created_at"))
+        temp3 = temp2[:10]
+        date = datetime.strptime(temp3, "%Y-%m-%d")
+        date = date.strftime("%d/%m/%Y")
+        date_list.append(date)
+    # add to dataframe
+    df["Date"] = date_list
 
+    # Individual Report URLs
+    url_list = []
+    for i in range(len(id_list)):
+        temp = "https://hackerone.com/reports/" + id_list[i]
+        url_list.append(temp)
+    # add to dataframe
+    df["url"] = url_list
 
-# fix severity values
-df.replace(to_replace="critical", value="Critical", inplace=True)
-df.replace(to_replace="high", value="High", inplace=True)
-df.replace(to_replace="medium", value="Medium", inplace=True)
-df.replace(to_replace="low", value="Low", inplace=True)
-df.replace(to_replace="none", value="Info", inplace=True)
+    # add columns
+    df.insert(0, "LineText", "")
+    df.insert(0, "ColumnNumber", 1)
+    df.insert(0, "LineNumber", 1)
+    df.insert(0, "SourceFileName", "")
+    df.insert(0, "IssueID", "")
+    df.insert(0, "parameter", "")
+    df.insert(0, "Source", "HackerOne")
 
-# reorder columns
-df = df[
-    [
-        "Severity",
-        "CWE",
-        "Source",
-        "url",
-        "parameter",
-        "NativeID",
-        "ShortDescription",
-        "LongDescription",
-        "IssueID",
-        "Date",
-        "SourceFileName",
-        "LineNumber",
-        "ColumnNumber",
-        "LineText",
+    # fix severity values
+    df.replace(to_replace="critical", value="Critical", inplace=True)
+    df.replace(to_replace="high", value="High", inplace=True)
+    df.replace(to_replace="medium", value="Medium", inplace=True)
+    df.replace(to_replace="low", value="Low", inplace=True)
+    df.replace(to_replace="none", value="Info", inplace=True)
+
+    # reorder columns
+    df = df[
+        [
+            "Severity",
+            "CWE",
+            "Source",
+            "url",
+            "parameter",
+            "NativeID",
+            "ShortDescription",
+            "LongDescription",
+            "IssueID",
+            "Date",
+            "SourceFileName",
+            "LineNumber",
+            "ColumnNumber",
+            "LineText",
+        ]
     ]
-]
 
-# write file
-df.to_csv("h1-export.csv", index=False)
-
-print(df)
+    # write file
+    df.to_csv("h1-export.csv", index=False)
+    print("Here's a quick preview of the ThreadFix .csv file:\n")
+    print(df[["Severity", "CWE", "ShortDescription", "Date"]])
