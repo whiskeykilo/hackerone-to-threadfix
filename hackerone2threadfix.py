@@ -7,16 +7,29 @@ import argparse
 import json
 from datetime import datetime
 
-# usage
+## Usage
 parser = argparse.ArgumentParser(
     description="""Script that enables a quick, API-based export from HackerOne to a compatible .csv format for fast upload to ThreadFix."""
 )
 parser.add_argument("h1_program_handle", help="your HackerOne program handle")
 args = parser.parse_args()
 
-# extract function
+## Variables
+# API variables
+headers = {"Accept": "application/json"}
+url = "https://api.hackerone.com/v1/"
+
+# get H1 API creds from OS variables
+user = os.environ.get("H1_IDENTIFIER")
+token = os.environ.get("H1_TOKEN")
+program = os.environ.get("H1_PROGRAM")
+
+
+## Functions
 def json_extract(obj, key):
-    """Recursively fetch values from nested JSON."""
+    """
+    Recursively fetch values from nested JSON.
+    """
     arr = []
 
     def extract(obj, arr, key):
@@ -36,41 +49,49 @@ def json_extract(obj, key):
     return values
 
 
-# API variables
-headers = {"Accept": "application/json"}
-url = "https://api.hackerone.com/v1/"
-# dataframe
-df = pandas.DataFrame()
-
-# get H1 API creds from OS variables
-user = os.environ.get("H1_IDENTIFIER")
-token = os.environ.get("H1_TOKEN")
-program = os.environ.get("H1_PROGRAM")
-
-# get all program reports from the H1 API
-raw = requests.get(
-    "https://api.hackerone.com/v1/reports/",
-    auth=(user, token),
-    params={"filter[program][]": [sys.argv[1]]},
-    headers=headers,
-)
-
-response = raw.json()
-
-# Check authentication & authorization
-if raw.status_code == 404:
-    print("\nThe H1 API returned no data.\n")
-    print(
-        "There may be an issue with your authentication or authorization. Please check that your H1 API identifier, API token, program handle, and program permissions are all correct.\n"
+def query_api():
+    """
+    This function queries the HackerOne API for all reports in a given program
+    """
+    global raw
+    # get all program reports from the H1 API
+    raw = requests.get(
+        "https://api.hackerone.com/v1/reports/",
+        auth=(user, token),
+        params={"filter[program][]": [sys.argv[1]]},
+        headers=headers,
     )
-    print(
-        "Helpful references:\n- https://api.hackerone.com\n- https://docs.hackerone.com"
-    )
-else:
+
+
+def check_auth():
+    """
+    This function check that authentication & authorization is correct
+    """
+    # Check authentication & authorization
+    if raw.status_code == 404:
+        print("\nThe H1 API returned no data.\n")
+        print(
+            "There may be an issue with your authentication or authorization. Please check that your H1 API identifier, API token, program handle, and program permissions are all correct.\n"
+        )
+        print(
+            "Helpful references:\n- https://api.hackerone.com\n- https://docs.hackerone.com"
+        )
+        exit()
+
+
+def create_csv():
+    """
+    This function creates the CSV file from the API response
+    """
+    # create dataframe
+    df = pandas.DataFrame()
+
+    # convert response to json format
+    response = raw.json()
+
     # Report IDs - data.id
     id_list = [response["data"][id]["id"] for id in range(len(response["data"]))]
-    print("Number of reports found: " + str(len(id_list)) + "\n")
-
+    print("\nNumber of H1 reports found: " + str(len(id_list)) + "\n")
     # add to dataframe
     df["NativeID"] = id_list
 
@@ -130,7 +151,7 @@ else:
     # add to dataframe
     df["url"] = url_list
 
-    # add columns
+    # add columns to dataframe
     df.insert(0, "LineText", "")
     df.insert(0, "ColumnNumber", 1)
     df.insert(0, "LineNumber", 1)
@@ -170,3 +191,10 @@ else:
     df.to_csv("h1-export.csv", index=False)
     print("Here's a quick preview of the ThreadFix .csv file:\n")
     print(df[["Severity", "CWE", "ShortDescription", "Date"]])
+
+
+## Main
+if __name__ == "__main__":
+    query_api()
+    check_auth()
+    create_csv()
