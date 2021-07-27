@@ -19,10 +19,16 @@ args = parser.parse_args()
 headers = {"Accept": "application/json"}
 url = "https://api.hackerone.com/v1/"
 
-# get H1 API creds from OS variables
+# get H1 API creds from OS variables and check if they're filled
 user = os.environ.get("H1_IDENTIFIER")
+if user == None:
+    exit("Please ensure your 'H1_IDENTIFIER' environment variable is set correctly.")
 token = os.environ.get("H1_TOKEN")
+if token == None:
+    exit("Please ensure your 'H1_TOKEN' environment variable is set correctly.")
 program = os.environ.get("H1_PROGRAM")
+if program == None:
+    exit("Please ensure your 'H1_PROGRAM' environment variable is set correctly.")
 
 
 ## Functions
