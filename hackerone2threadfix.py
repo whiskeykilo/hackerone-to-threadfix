@@ -27,9 +27,6 @@ token = os.environ.get("H1_TOKEN")
 if token == None:
     exit("Please ensure your 'H1_TOKEN' environment variable is set correctly.")
 program = os.environ.get("H1_PROGRAM")
-if program == None:
-    exit("Please ensure your 'H1_PROGRAM' environment variable is set correctly.")
-
 
 ## Functions
 def json_extract(obj, key):
