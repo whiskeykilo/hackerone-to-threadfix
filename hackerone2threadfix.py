@@ -56,20 +56,19 @@ def query_api():
     """
     This function queries the HackerOne API for all reports in a given program
     """
-    global raw
-    # get all program reports from the H1 API
+    global response
+
     raw = requests.get(
         "https://api.hackerone.com/v1/reports/",
         auth=(user, token),
-        params={"filter[program][]": [sys.argv[1]]},
+        # ADD CUSTOM PARAMETERS AND FILTERS HERE: https://api.hackerone.com/customer-resources/?python#reports-get-all-reports
+        params={
+            "filter[program][]": [sys.argv[1]],
+            "page[size]": 100,
+        },
         headers=headers,
     )
 
-
-def check_auth():
-    """
-    This function check that authentication & authorization is correct
-    """
     # Check authentication & authorization
     if raw.status_code == 404:
         print("\nThe H1 API returned no data.\n")
@@ -81,6 +80,18 @@ def check_auth():
         )
         exit()
 
+    raw = raw.json()  # convert json to raw
+    response = raw["data"]  # strip data
+
+    # H1 API is paginated, capped at 100 reports per call. Iterate until all reports are found
+    while "next" in raw["links"]:
+        raw = requests.get(
+            raw["links"]["next"],
+            auth=(user, token),
+            headers=headers,
+        ).json()
+        response.extend(raw["data"])
+
 
 def create_csv():
     """
@@ -89,19 +100,17 @@ def create_csv():
     # create dataframe
     df = pandas.DataFrame()
 
-    # convert response to json format
-    response = raw.json()
-
     # Report IDs - data.id
-    id_list = [response["data"][id]["id"] for id in range(len(response["data"]))]
-    print("\nNumber of H1 reports found: " + str(len(id_list)) + "\n")
+    id_list = [response[id]["id"] for id in range(len(response))]
+    print("\nTotal number of H1 reports found: " + str(len(id_list)) + "\n")
+
     # add to dataframe
     df["NativeID"] = id_list
 
     # Weaknesses - data.relationships.weakness.data.attributes.external_id
     cwe_list = []
     for id in range(len(id_list)):
-        temp = response["data"][id]["relationships"]
+        temp = response[id]["relationships"]
         temp2 = "".join(json_extract(temp, "external_id"))
         cwe_list.append(temp2[4:])
     # add to dataframe
@@ -110,7 +119,7 @@ def create_csv():
     # Severities - data.relationships.severity.data.attributes.rating
     sev_list = []
     for id in range(len(id_list)):
-        temp = response["data"][id]["relationships"]
+        temp = response[id]["relationships"]
         temp2 = "".join(json_extract(temp, "rating"))
         sev_list.append(temp2)
     # add to dataframe
@@ -119,7 +128,7 @@ def create_csv():
     # Report Title - data.attributes.title
     title_list = []
     for id in range(len(id_list)):
-        temp = response["data"][id]["attributes"]
+        temp = response[id]["attributes"]
         temp2 = "".join(json_extract(temp, "title"))
         title_list.append(temp2)
     # add to dataframe
@@ -128,7 +137,7 @@ def create_csv():
     # Report Body - data.attributes.vulnerability_information
     body_list = []
     for id in range(len(id_list)):
-        temp = response["data"][id]["attributes"]
+        temp = response[id]["attributes"]
         temp2 = "".join(json_extract(temp, "vulnerability_information"))
         body_list.append(temp2)
     # add to dataframe
@@ -137,7 +146,7 @@ def create_csv():
     # Date - data.attributes.created_at - 2021-04-07T17:34:57.748Z
     date_list = []
     for id in range(len(id_list)):
-        temp = response["data"][id]["attributes"]
+        temp = response[id]["attributes"]
         temp2 = "".join(json_extract(temp, "created_at"))
         temp3 = temp2[:10]
         date = datetime.strptime(temp3, "%Y-%m-%d")
@@ -192,12 +201,11 @@ def create_csv():
 
     # write file
     df.to_csv("h1-export.csv", index=False)
-    print("Here's a quick preview of the ThreadFix .csv file:\n")
-    print(df[["Severity", "CWE", "ShortDescription", "Date"]])
+    print("Here's a 10 row preview of the ThreadFix .csv file:\n")
+    print(df.head(10)[["Severity", "CWE", "ShortDescription", "Date"]])
 
 
 ## Main
 if __name__ == "__main__":
     query_api()
-    check_auth()
     create_csv()
