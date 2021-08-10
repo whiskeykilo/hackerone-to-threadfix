@@ -45,7 +45,7 @@ ThreadFix: SSVL Converter tool can be used with mappings and changes specified b
 | CWE | data.relationships.weakness.data.attributes.external_id | trim “cwe-“ off the front |
 | Source | none | value for all reports should be 'HackerOne' |
 | url | none | build from 'https://hackerone.com/reports/' + data.id |
-| paramter | none | leave blank |
+| parameter | none | leave blank |
 | NativeID | data.id | none |
 | ShortDescription | data.attributes.title | none |
 | LongDescription | data.attributes.vulnerability_information | none |
