@@ -3,6 +3,8 @@ This script enables a quick, API-based export from HackerOne to a compatible .cs
 
 HackerOne offers the ability to quickly export reports from a program via its API. This script takes HackerOne program data and converts it to a format that can be ingested by ThreadFix via their SSVL Converter tool.
 
+This tool is not supported or endorsed by HackerOne.
+
 ## Installation
 Python 3 recommended.
 
