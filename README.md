@@ -17,7 +17,7 @@ sudo pip install -r requirements.txt
 
 ### Clone Repo
 ```
-git clone https://github.com/whiskeykilosec/hackerone2threadfix.git
+git clone https://github.com/whisk3ykilo/hackerone2threadfix.git
 ```
 or just grab the python file
 
@@ -36,8 +36,8 @@ HackerOne
 - https://docs.hackerone.com
 
 ThreadFix: SSVL Converter tool can be used with mappings and changes specified below
-- formatting guidelines: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/24088548/SSVL+Converter
-- tool reference: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/496009270/ThreadFix+File+Format
+- formatting guidelines: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/496009270/ThreadFix+File+Format
+- tool reference: https://denimgroup.atlassian.net/wiki/spaces/TDOC/pages/24088548/SSVL+Converter
 
 ## Field Mapping
 
