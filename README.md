@@ -1,4 +1,4 @@
-# hackerone2threadfix
+# hackerone-to-threadfix
 This script enables a quick, API-based export from HackerOne to a compatible .csv format for fast upload to ThreadFix.
 
 HackerOne offers the ability to quickly export reports from a program via its API. This script takes HackerOne program data and converts it to a format that can be ingested by ThreadFix via their SSVL Converter tool.
